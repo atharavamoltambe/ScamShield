@@ -44,7 +44,8 @@ PAYMENT_KEYWORDS = [
 
 ADVISORY_KEYWORDS = [
     "beware", "warning", "scam alert", "public interest", "fake message", 
-    "advisory", "warns", "alert", "don't install", "do not download", "don't click"
+    "advisory", "warns", "alert", "don't install", "do not download", "don't click",
+    "awareness", "public awareness"
 ]
 
 AUTHORITY_KEYWORDS = [
