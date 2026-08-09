@@ -1,0 +1,17 @@
+Delivery and Parcel Scams: Overview
+Delivery and parcel scams exploit the high volume of online shopping by sending fake shipment updates. These messages claim a delivery failed or is held at customs.
+
+Common Scam Patterns:
+- A message claiming a package cannot be delivered because of an incomplete address or unpaid customs fees.
+- Example: "Your courier shipment is held at our warehouse due to incorrect address. Please update your address and pay a small verification fee of Rs 15 to reschedule delivery: http://cutt.ly/delivery-tracker"
+- The links lead to phishing pages designed to steal credit card details.
+
+Warning Signs:
+- Requests for money or payment (even small amounts like Rs 15 or Rs 50) to update addresses or release packages.
+- Urgent requests to click on short URLs (e.g. bit.ly, cutt.ly, tinyurl.com) to track or resolve a delivery issue.
+- Delivery notifications for packages you never ordered.
+
+Safe Verification Practices:
+- Verify tracking numbers directly on the official website of the courier company (e.g., India Post, DHL, FedEx) rather than clicking links in SMS/WhatsApp.
+- Never pay fees to release a standard consumer package through unsolicited SMS links.
+- Look up the courier's official contact information to verify delivery attempts.

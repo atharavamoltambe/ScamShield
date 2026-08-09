@@ -1,0 +1,17 @@
+Banking and KYC Scams: Overview
+Banking and KYC (Know Your Customer) scams involve fraudulent communications impersonating banks or financial institutions. The goal is to trick users into providing login credentials, OTPs, or debit/credit card numbers.
+
+Common Scam Patterns:
+- Scammers send messages claiming the user's bank account or credit card is blocked or suspended due to missing KYC updates.
+- Example: "Dear customer, your SBI account has been blocked today. Please update your KYC immediately to reactivate. Click here to verify: https://sbi-verify.xyz/kyc"
+- They request the user to click a link leading to a look-alike login page or ask them to download an APK for remote access/verification.
+
+Warning Signs:
+- Urgent warnings that your account will be suspended or permanently blocked.
+- Request for sensitive information like passwords, UPI PINs, CVV, or One-Time Passwords (OTPs). Note: Banks never ask for these details.
+- Domains that look like official banks but use different formats or prefixes/suffixes (e.g., "sbi-kyc.info", "icici-secure.xyz" instead of the official domains "sbi.co.in", "icicibank.com").
+
+Safe Verification Practices:
+- Always contact your bank directly through the customer care number listed on the physical bank card or their official website.
+- Log in to your banking account only through the official banking app or trusted, verified domains (e.g. sbi.co.in, hdfcbank.com, icicibank.com).
+- Report cyber frauds immediately by calling the National Cyber Fraud Helpline at 1930.

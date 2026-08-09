@@ -1,0 +1,17 @@
+RTO e-Challan Scams: Overview
+RTO (Regional Transport Office) or e-Challan scams involve fraudulent messages sent via SMS or WhatsApp claiming that a vehicle has an unpaid traffic violation fine or challan.
+
+Common Scam Patterns:
+- The scammer sends a message stating a vehicle has a pending traffic fine. E.g., "TRAFFIC POLICE NOTICE: Your vehicle registration has an unpaid challan of Rs 500. Pay within 24 hours to avoid vehicle blacklisting."
+- The message often includes an APK file (like "RTO_Challan.apk" or "mParivahan.apk") disguised as an official application to view or pay the fine.
+- A suspicious link resembles the official site (e.g., "parivahaan.com/pay" instead of the official "echallan.parivahan.gov.in").
+
+Warning Signs:
+- Urgent threats of immediate penalties, license cancellation, or court dates if payment is not made within a short period (e.g., 24 hours).
+- Request to install an APK file directly onto the mobile device. Official government apps are only distributed via Google Play Store or Apple App Store.
+- Links that do not end in the trusted official domain format: .gov.in (specifically parivahan.gov.in).
+
+Safe Verification Practices:
+- Always verify vehicle details and pending challans using the official e-Challan website: https://echallan.parivahan.gov.in
+- Use the official mParivahan app downloaded from trusted app stores.
+- Do not make payments through unknown third-party links or download attachments from SMS or messaging apps.
