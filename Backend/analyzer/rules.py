@@ -31,7 +31,8 @@ URGENCY_KEYWORDS = [
     "pay immediately", "click now", "act now", "within 24 hours", "today only", 
     "account will be blocked", "account blocked", "immediate action", "urgent", 
     "final warning", "last chance", "avoid penalty", "avoid legal action", 
-    "pay now", "verify immediately", "expires today"
+    "pay now", "verify immediately", "expires today", "immediately", "urgently",
+    "blocked", "suspended", "expired", "expiring", "action required", "now"
 ]
 
 # Define suspicious payment-related keywords
@@ -39,7 +40,7 @@ PAYMENT_KEYWORDS = [
     "joining fee", "registration fee", "interview fee", "processing fee", 
     "placement fee", "customs fee", "delivery fee", "pay now", "unpaid challan", 
     "traffic fine", "vehicle fine", "pending fine", "road tax", "unpaid", 
-    "payment", "payout", "fee"
+    "payment", "payout", "fee", "pay", "fine", "charge", "transfer", "send money"
 ]
 
 ADVISORY_KEYWORDS = [
@@ -53,6 +54,33 @@ AUTHORITY_KEYWORDS = [
     "pib", "authority", "official warning"
 ]
 
+CREDENTIAL_KEYWORDS = [
+    "otp", "password", "pin", "cvv", "kyc", "credential", 
+    "blocked", "suspended", "verify account", "verify credentials", "verify kyc",
+    "bank account", "login", "username"
+]
+
+IMPERSONATION_KEYWORDS = [
+    "police", "rto", "rbi", "reserve bank", "customs", "tax department", 
+    "courier", "dhl", "speed post", "official authority"
+]
+
+def get_matched_keywords(text_lower: str, keywords: List[str]) -> List[str]:
+    """
+    Finds keywords in text_lower using word boundary checks for short words (<=3 chars)
+    to prevent false positives like matching 'pin' in 'shopping' or 'pending'.
+    """
+    matched = []
+    for kw in keywords:
+        if len(kw) <= 3:
+            pattern = r'\b' + re.escape(kw) + r'\b'
+            if re.search(pattern, text_lower):
+                matched.append(kw)
+        else:
+            if kw in text_lower:
+                matched.append(kw)
+    return matched
+
 def analyze_text_rules(text: str) -> Dict:
     """
     Run rules-based detection on the input text.
@@ -63,12 +91,8 @@ def analyze_text_rules(text: str) -> Dict:
     # 1. Category keyword matching
     category_scores = {}
     for cat, keywords in CATEGORIES.items():
-        score = 0
-        for kw in keywords:
-            # Match keywords as sub-strings
-            if kw in text_lower:
-                score += 1
-        category_scores[cat] = score
+        matched = get_matched_keywords(text_lower, keywords)
+        category_scores[cat] = len(matched)
     
     # Select the category with the highest evidence
     strongest_cat = None
@@ -86,31 +110,31 @@ def analyze_text_rules(text: str) -> Dict:
         apk_detected = True
 
     # 3. Urgency Detection
-    urgency_detected = False
-    matched_urgency_words = []
-    for kw in URGENCY_KEYWORDS:
-        if kw in text_lower:
-            urgency_detected = True
-            matched_urgency_words.append(kw)
+    matched_urgency_words = get_matched_keywords(text_lower, URGENCY_KEYWORDS)
+    urgency_detected = len(matched_urgency_words) > 0
 
     # 4. Forwarded + Urgency Detection
     forwarded_detected = "forwarded" in text_lower
     forwarded_urgency_combination = forwarded_detected and urgency_detected
 
     # 5. Suspicious Payment Language Detection
-    payment_detected = False
-    matched_payment_words = []
-    for kw in PAYMENT_KEYWORDS:
-        if kw in text_lower:
-            payment_detected = True
-            matched_payment_words.append(kw)
+    matched_payment_words = get_matched_keywords(text_lower, PAYMENT_KEYWORDS)
+    payment_detected = len(matched_payment_words) > 0
 
     # 6. Advisory / Awareness Detection
-    advisory_detected = False
-    if any(kw in text_lower for kw in ADVISORY_KEYWORDS) and any(auth in text_lower for auth in AUTHORITY_KEYWORDS):
-        advisory_detected = True
+    matched_advisories = get_matched_keywords(text_lower, ADVISORY_KEYWORDS)
+    matched_authorities = get_matched_keywords(text_lower, AUTHORITY_KEYWORDS)
+    advisory_detected = len(matched_advisories) > 0 and len(matched_authorities) > 0
 
-    # Compile indicators and explanations
+    # 7. Credential / Account Detection
+    matched_credentials = get_matched_keywords(text_lower, CREDENTIAL_KEYWORDS)
+    credential_detected = len(matched_credentials) > 0 or ("verify" in text_lower and "account" in text_lower)
+
+    # 8. Impersonation Detection
+    matched_impersonations = get_matched_keywords(text_lower, IMPERSONATION_KEYWORDS)
+    impersonation_detected = len(matched_impersonations) > 0
+
+    # Compile indicators and explanations for retro-compatibility
     indicators = []
     reasons = []
 
@@ -134,11 +158,18 @@ def analyze_text_rules(text: str) -> Dict:
         indicators.append("Suspicious payment language detected")
         reasons.append(f"The message references a payment request or fee: '{', '.join(matched_payment_words[:2])}'.")
 
+    if credential_detected:
+        indicators.append("Credential / Account risk detected")
+        reasons.append("The message targets sensitive credentials (like OTP/passwords) or threatens account suspension.")
+
+    if impersonation_detected:
+        indicators.append("Impersonation attempt detected")
+        reasons.append("The message uses wording mimicking a government agency, police force, bank, or other official authority.")
+
     if advisory_detected:
         indicators.append("Official safety advisory detected")
         reasons.append("The message appears to be an official warning or public safety advisory raising awareness about scam vectors.")
 
-  # Return results including advisory indicator
     return {
         "strongest_category": strongest_cat,
         "category_scores": category_scores,
@@ -149,6 +180,8 @@ def analyze_text_rules(text: str) -> Dict:
         "forwarded_urgency_combination": forwarded_urgency_combination,
         "payment_detected": payment_detected,
         "advisory_detected": advisory_detected,
+        "credential_detected": credential_detected,
+        "impersonation_detected": impersonation_detected,
         "indicators": indicators,
         "reasons": reasons
     }

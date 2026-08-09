@@ -13,6 +13,7 @@ import RecentReports from "./components/RecentReports";
 import HowItWorks from "./components/HowItWorks";
 import Footer from "./components/Footer";
 import ReportDetailModal from "./components/ReportDetailModal";
+import RiskBreakdown from "./components/RiskBreakdown";
 import { checkMessage, getReports, getHealth } from "./services/api";
 import { AlertCircle, Loader } from "lucide-react";
 
@@ -151,6 +152,11 @@ export default function App() {
               {/* Left Column: Result Card and AI Explanations */}
               <div className="dashboard-column">
                 <ResultCard result={result} />
+                <RiskBreakdown 
+                  riskBreakdown={result.risk_breakdown} 
+                  strongestWarning={result.strongest_warning} 
+                  verdict={result.verdict} 
+                />
                 <AIExplanation 
                   explanation={result.explanation} 
                   ragContext={result.rag_context} 

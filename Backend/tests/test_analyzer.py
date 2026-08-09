@@ -76,7 +76,7 @@ def test_job_scam():
 def test_shortened_url():
     # 6. Shortened URL
     payload = {
-        "text": "Click this link: bit.ly/some-link"
+        "text": "Click this link now: bit.ly/some-link"
     }
     response = client.post("/api/check", json=payload)
     assert response.status_code == 200
@@ -182,3 +182,116 @@ def test_official_advisory_spoofed_high_risk():
     assert data["verdict"] == "high_risk"
     assert "Official safety advisory detected" in data["indicators"]
     assert "Suspicious look-alike domain detected" in data["indicators"] or "Suspicious domain detected" in data["indicators"]
+
+def test_risk_breakdown_challan_apk():
+    # Test 1 — Fake challan APK
+    payload = {
+        "text": "Traffic Police Notice. Your vehicle has an unpaid challan. Pay within 24 hours. Download RTO_Challan.apk and visit https://parivahaan.com/pay"
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "high_risk"
+    # Points expected: APK (40) + Look-alike domain (30) + Urgency (15) + Scam language (7) + Payment (20) + Impersonation (15) = 127 -> Capped at 100
+    assert data["score"] == 100
+    
+    breakdown = data["risk_breakdown"]
+    categories = [item["category"] for item in breakdown]
+    assert "file_risk" in categories
+    assert "link_risk" in categories
+    assert "urgency" in categories
+    assert "scam_language" in categories
+    
+    # Verify strongest warning
+    assert data["strongest_warning"]["factor"] == "Suspicious APK"
+    assert data["strongest_warning"]["points"] == 40
+
+def test_risk_breakdown_banking_scam():
+    # Test 2 — Banking scam
+    payload = {
+        "text": "Your KYC has expired. Your bank account will be blocked within 24 hours. Click now to verify your account."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "caution"
+    # Points expected: Urgency (15) + Credential risk (30) + Scam language (7) = 52
+    assert data["score"] == 52
+
+def test_risk_breakdown_shortener():
+    # Test 3 — Shortened URL
+    payload = {
+        "text": "Your reward is waiting. Click now: https://bit.ly/example"
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    # Points expected: Shortened URL (15) + Urgency (15) = 30
+    assert data["score"] == 30
+    assert any(item["category"] == "link_risk" and item["factor"] == "Shortened URL" for item in data["risk_breakdown"])
+
+def test_risk_breakdown_forwarded_urgency():
+    # Test 4 — Forwarded urgency
+    payload = {
+        "text": "Forwarded: Your account will be blocked within 24 hours. Verify immediately."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "high_risk"
+    # Points expected: Urgency (15) + Forwarded urgency (15) + Credential risk (30) = 60
+    assert data["score"] == 60
+
+def test_risk_breakdown_safe():
+    # Test 5 — Safe message
+    payload = {
+        "text": "Your order has been delivered successfully. Thank you for shopping with us."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "safe"
+    assert data["score"] == 0
+    # Safe message should clear risk breakdown array
+    assert data["risk_breakdown"] == []
+    assert data["strongest_warning"] is None
+
+def test_risk_breakdown_multiple_urgency():
+    # Test 6 — Multiple urgency keywords
+    payload = {
+        "text": "Pay immediately. Click now. Final warning. You have 24 hours."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    # Points expected: Urgency (15) + Payment risk (20) = 35
+    assert data["score"] == 35
+    # Urgency must be counted exactly once
+    urgency_items = [item for item in data["risk_breakdown"] if item["category"] == "urgency"]
+    assert len(urgency_items) == 1
+
+def test_risk_breakdown_multiple_keywords():
+    # Test 7 — Multiple scam keywords
+    payload = {
+        "text": "challan e-challan pending fine mParivahan."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    # Points expected: Scam language (7) + Payment risk (20) [fine] = 27 (Safe score)
+    assert data["score"] < 30
+    assert data["verdict"] == "safe"
+
+def test_risk_breakdown_legitimate_gov_domain():
+    # Test 8 — Legitimate government domain
+    payload = {
+        "text": "Check your challan status at https://echallan.parivahan.gov.in"
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    # Legitimate URL must not count positive points
+    # Points expected: Scam language (7) [challan] + Payment risk (20) [challan] = 27 (Safe score)
+    assert data["score"] < 30
+    assert data["verdict"] == "safe"
+

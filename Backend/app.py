@@ -164,7 +164,7 @@ def check_message(payload: CheckRequest):
         category = strongest_cat
         
     # 3. Calculate risk score & verdict
-    score, verdict, confidence, indicators, base_reasons, action = calculate_risk(
+    score, verdict, confidence, indicators, base_reasons, action, risk_breakdown, strongest_warning = calculate_risk(
         category=category,
         rules_analysis=rules_res,
         url_analysis=urls_res
@@ -224,7 +224,9 @@ def check_message(payload: CheckRequest):
         "rag_context": rag_res["context"],
         "explanation": explanation,
         "explanation_source": explanation_source,
-        "action": action
+        "action": action,
+        "risk_breakdown": risk_breakdown,
+        "strongest_warning": strongest_warning
     }
 
 @app.post("/api/report")

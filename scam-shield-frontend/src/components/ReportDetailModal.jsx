@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, ShieldAlert, Clock, RefreshCw, AlertTriangle, CheckCircle2, ShieldAlert as AlertIcon, Search, Link as LinkIcon, BookOpen, Sparkles } from "lucide-react";
+import RiskBreakdown from "./RiskBreakdown";
 
 export default function ReportDetailModal({ report, onClose, apiBaseUrl }) {
   const [analysis, setAnalysis] = useState(null);
@@ -182,6 +183,12 @@ export default function ReportDetailModal({ report, onClose, apiBaseUrl }) {
                       </div>
                     )}
                   </div>
+
+                  <RiskBreakdown 
+                    riskBreakdown={analysis.risk_breakdown} 
+                    strongestWarning={analysis.strongest_warning} 
+                    verdict={analysis.verdict} 
+                  />
 
                   {/* AI Plain English Explanation */}
                   {analysis.explanation && (

@@ -2219,3 +2219,213 @@ button, input, textarea {
     font-size: 0.875rem;
   }
 }
+
+/* --- Risk Breakdown Dashboard Component --- */
+.risk-breakdown-card {
+  padding: 24px;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+}
+
+.breakdown-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: 12px;
+}
+
+.breakdown-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.breakdown-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.safe-breakdown-message {
+  padding: 24px;
+  border: 2px dashed var(--border-light);
+  border-radius: 12px;
+  background-color: var(--bg-main);
+  text-align: center;
+}
+
+.safe-breakdown-text {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.breakdown-row-wrapper {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  padding-bottom: 12px;
+}
+
+.breakdown-row-wrapper:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.breakdown-row-trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 6px 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.row-main-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.row-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.row-factor-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+}
+
+.row-points-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+}
+
+.row-points-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.row-points-badge.points-badge-high {
+  background-color: var(--high-bg);
+  color: var(--high-text);
+}
+
+.row-points-badge.points-badge-medium {
+  background-color: var(--caution-bg);
+  color: var(--caution-text);
+}
+
+.row-points-badge.points-badge-low {
+  background-color: var(--bg-main);
+  color: var(--text-muted);
+}
+
+.breakdown-progress-track {
+  height: 5px;
+  background-color: #f1f5f9;
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.breakdown-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.breakdown-progress-bar.severity-bar-high {
+  background-color: var(--high-strong);
+}
+
+.breakdown-progress-bar.severity-bar-medium {
+  background-color: var(--caution-strong);
+}
+
+.breakdown-progress-bar.severity-bar-low {
+  background-color: var(--primary-teal);
+}
+
+.breakdown-explanation-box {
+  background-color: var(--bg-main);
+  border-left: 3px solid var(--primary-teal);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin-top: 10px;
+}
+
+.breakdown-explanation-box.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.explanation-caption-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.explanation-paragraph-text {
+  font-size: 0.8125rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+/* Strongest Warning UI Box */
+.strongest-warning-panel {
+  margin-top: 18px;
+  padding: 16px;
+  background-color: var(--high-bg);
+  border: 1px solid var(--high-border);
+  border-radius: 12px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.strongest-warning-alert-row {
+  display: flex;
+  align-items: center;
+  color: var(--high-text);
+  margin-bottom: 6px;
+}
+
+.strongest-warning-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.strongest-warning-factor {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 2px;
+}
+
+.strongest-warning-message {
+  font-size: 0.825rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+  font-style: italic;
+}
