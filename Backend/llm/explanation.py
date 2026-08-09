@@ -54,9 +54,12 @@ def generate_deterministic_fallback(
         summary = "No major scam indicators were identified in this message."
         
     # Risky reasons
-    why_risky = list(reasons)
-    if not why_risky:
-        why_risky = ["No specific threat indicators were flagged by the rule engine."]
+    if verdict == "safe":
+        why_risky = []
+    else:
+        why_risky = list(reasons)
+        if not why_risky:
+            why_risky = ["No specific threat indicators were flagged by the rule engine."]
         
     # Actions
     what_to_do = []
