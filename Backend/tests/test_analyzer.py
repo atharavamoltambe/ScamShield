@@ -157,3 +157,28 @@ def test_reports_api():
     assert reports[0]["text"] == "Urgent: call bank immediately"
     assert reports[0]["notes"] == "Spam call follow-up SMS"
     assert "timestamp" in reports[0]
+
+def test_official_advisory_safe():
+    # Advisory from RBI without links should be flagged safe
+    payload = {
+        "text": "Reserve Bank of India (RBI) scam alert: Beware of fake SMS messages asking to download RTO_Challan.apk. Issued in public interest."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "safe"
+    assert data["score"] == 10
+    assert "Official safety advisory detected" in data["indicators"]
+    assert "safety action" in data["action"].lower()
+
+def test_official_advisory_spoofed_high_risk():
+    # Spoofed advisory containing a suspicious link should remain high risk
+    payload = {
+        "text": "rbi advisory warning: click http://fake-rbi.xyz to verify your UPI account immediately."
+    }
+    response = client.post("/api/check", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["verdict"] == "high_risk"
+    assert "Official safety advisory detected" in data["indicators"]
+    assert "Suspicious look-alike domain detected" in data["indicators"] or "Suspicious domain detected" in data["indicators"]

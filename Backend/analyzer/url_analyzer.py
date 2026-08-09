@@ -9,7 +9,8 @@ TRUSTED_DOMAINS = [
     "onlineservices.mp.gov.in",
     "sbi.co.in",
     "hdfcbank.com",
-    "icicibank.com"
+    "icicibank.com",
+    "rbi.org.in"
 ]
 
 SHORTENER_DOMAINS = [
@@ -106,7 +107,7 @@ def analyze_domain(domain: str) -> Tuple[str, str]:
         return "suspicious", "Shortened links hide the real destination website and make it harder to verify where the link leads."
         
     # 3. Check for keywords of trusted brands (spoofing)
-    brand_keywords = ["sbi", "hdfc", "icici", "parivahan", "challan"]
+    brand_keywords = ["sbi", "hdfc", "icici", "parivahan", "challan", "rbi"]
     for kw in brand_keywords:
         if kw in check_domain:
             return "suspicious", "Possible look-alike domain mimicking an official brand or service."

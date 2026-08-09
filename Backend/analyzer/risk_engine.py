@@ -92,6 +92,11 @@ def calculate_risk(
     # Ensure score doesn't exceed 100
     score = min(max(score, 0), 100)
 
+    # Override score for safe official advisories (no suspicious URLs)
+    advisory_detected = rules_analysis.get("advisory_detected", False)
+    if advisory_detected and not suspicious_urls:
+        score = 10  # Downgrade to safe level
+
     # Determine Verdict
     if score >= 60:
         verdict = "high_risk"
@@ -101,24 +106,21 @@ def calculate_risk(
         verdict = "safe"
 
     # Calculate Confidence (0.0 to 1.0)
-    # If the score is extremely high or 0, our confidence is usually high.
-    # If there are multiple aligned indicators, confidence goes up.
     if score == 0:
         confidence = 0.95
     elif score >= 90:
         confidence = 0.92
     else:
-        # Base confidence on matching indicators
         base_conf = 0.5
-        # Add factor for indicator count
         indicator_factor = min(len(indicators) * 0.15, 0.3)
-        # Add factor if a specific category was successfully identified
         category_factor = 0.15 if (category and category != "General Scam / Phishing") else 0.0
         confidence = round(base_conf + indicator_factor + category_factor, 2)
         confidence = min(max(confidence, 0.1), 0.95)
 
     # Determine Action Text
-    if verdict == "high_risk":
+    if advisory_detected and not suspicious_urls:
+        action = "This appears to be an official public safety advisory warning about scam patterns. Be aware of the warning details, but you do not need to take any safety action."
+    elif verdict == "high_risk":
         if category == "RTO / e-Challan Scam":
             action = "Do not open this file or click this link. Delete the message. Verify any challan only at echallan.parivahan.gov.in. If you already installed the file: disconnect from the internet, uninstall the app, change your banking/UPI passwords, and call 1930 (National Cyber Fraud Helpline)."
         elif category == "Banking / KYC Scam":

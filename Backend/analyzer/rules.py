@@ -42,6 +42,16 @@ PAYMENT_KEYWORDS = [
     "payment", "payout", "fee"
 ]
 
+ADVISORY_KEYWORDS = [
+    "beware", "warning", "scam alert", "public interest", "fake message", 
+    "advisory", "warns", "alert", "don't install", "do not download", "don't click"
+]
+
+AUTHORITY_KEYWORDS = [
+    "reserve bank", "rbi", "police", "government", "cyber cell", "cybercrime",
+    "pib", "authority", "official warning"
+]
+
 def analyze_text_rules(text: str) -> Dict:
     """
     Run rules-based detection on the input text.
@@ -94,6 +104,11 @@ def analyze_text_rules(text: str) -> Dict:
             payment_detected = True
             matched_payment_words.append(kw)
 
+    # 6. Advisory / Awareness Detection
+    advisory_detected = False
+    if any(kw in text_lower for kw in ADVISORY_KEYWORDS) and any(auth in text_lower for auth in AUTHORITY_KEYWORDS):
+        advisory_detected = True
+
     # Compile indicators and explanations
     indicators = []
     reasons = []
@@ -118,6 +133,11 @@ def analyze_text_rules(text: str) -> Dict:
         indicators.append("Suspicious payment language detected")
         reasons.append(f"The message references a payment request or fee: '{', '.join(matched_payment_words[:2])}'.")
 
+    if advisory_detected:
+        indicators.append("Official safety advisory detected")
+        reasons.append("The message appears to be an official warning or public safety advisory raising awareness about scam vectors.")
+
+  # Return results including advisory indicator
     return {
         "strongest_category": strongest_cat,
         "category_scores": category_scores,
@@ -127,6 +147,7 @@ def analyze_text_rules(text: str) -> Dict:
         "forwarded_detected": forwarded_detected,
         "forwarded_urgency_combination": forwarded_urgency_combination,
         "payment_detected": payment_detected,
+        "advisory_detected": advisory_detected,
         "indicators": indicators,
         "reasons": reasons
     }
