@@ -358,11 +358,19 @@ button, input, textarea {
 }
 
 .examples-title {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--primary-navy-light);
-  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 6px;
+}
+
+.examples-subtitle {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  line-height: 1.4;
+  max-width: 600px;
 }
 
 .example-chips {

@@ -26,7 +26,10 @@ const EXAMPLES = [
 export default function ExampleMessages({ onSelectExample }) {
   return (
     <div className="examples-container">
-      <span className="examples-title">Try an example:</span>
+      <h3 className="examples-title">Try a sample message</h3>
+      <p className="examples-subtitle">
+        Not sure what type of scam it is? Just paste the message — Scam Shield will identify the pattern automatically.
+      </p>
       <div className="example-chips">
         {EXAMPLES.map((example) => (
           <button
