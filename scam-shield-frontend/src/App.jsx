@@ -176,13 +176,13 @@ export default function App() {
           </section>
         )}
 
-        <HowItWorks />
-        
         <RecentReports
           reports={reports}
           loading={reportsLoading}
           onRefresh={fetchReportsFeed}
         />
+
+        <HowItWorks />
       </main>
       
       <Footer />
