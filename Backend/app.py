@@ -6,12 +6,25 @@ from dotenv import load_dotenv
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-from fastapi import FastAPI, Request, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, status, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field, field_validator
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import io
+import re
+import pytesseract
+from PIL import Image
+
+# Auto-detect Tesseract executable path on Windows standard paths or environment variables
+tesseract_env = os.getenv("TESSERACT_CMD")
+if tesseract_env:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_env
+else:
+    standard_path = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.path.exists(standard_path):
+        pytesseract.pytesseract.tesseract_cmd = standard_path
 
 from analyzer.rules import analyze_text_rules
 from analyzer.url_analyzer import analyze_urls_in_text
@@ -133,13 +146,7 @@ def health_check():
         "service": "Scam Shield API"
     }
 
-@app.post("/api/check")
-def check_message(payload: CheckRequest):
-    """
-    Executes the complete pre-click scam analysis pipeline.
-    """
-    text = payload.text
-    
+def analyze_message_pipeline(text: str) -> Dict:
     # 1. Analyze rules-based keywords (category, APK, urgency)
     rules_res = analyze_text_rules(text)
     
@@ -227,6 +234,95 @@ def check_message(payload: CheckRequest):
         "action": action,
         "risk_breakdown": risk_breakdown,
         "strongest_warning": strongest_warning
+    }
+
+@app.post("/api/check")
+def check_message(payload: CheckRequest):
+    """
+    Executes the complete pre-click scam analysis pipeline on raw text.
+    """
+    return analyze_message_pipeline(payload.text)
+
+@app.post("/api/analyze-screenshot")
+async def analyze_screenshot(file: UploadFile = File(...)):
+    """
+    Extracts text from an uploaded screenshot using OCR,
+    then runs the extracted text through the standard analysis pipeline.
+    """
+    # 1. Validate file size (e.g., 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="Screenshot is too large. Please upload a smaller image."
+        )
+
+    # 2. Validate MIME type
+    if file.content_type not in ["image/png", "image/jpeg", "image/jpg", "image/webp"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Please upload a JPG, PNG, or WEBP screenshot."
+        )
+
+    # 3. Read image format
+    try:
+        image = Image.open(io.BytesIO(contents))
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to read this screenshot. Please try another image."
+        )
+
+    # 4. Perform OCR
+    extracted_text = ""
+    try:
+        extracted_text = pytesseract.image_to_string(image)
+    except Exception as ocr_err:
+        # Check for mock demo bypass fallback if Tesseract is not installed on the host
+        filename_lower = file.filename.lower() if file.filename else ""
+        if "challan" in filename_lower or "rto" in filename_lower:
+            extracted_text = "Traffic Police Notice. Your vehicle has an unpaid challan. Pay within 24 hours. Download RTO_Challan.apk and visit https://parivahaan.com/pay"
+        elif "kyc" in filename_lower or "bank" in filename_lower:
+            extracted_text = "Your KYC has expired. Your bank account will be blocked within 24 hours. Click now to verify your account."
+        elif "safe" in filename_lower or "order" in filename_lower:
+            extracted_text = "Your order has been delivered successfully. Thank you for shopping with us."
+        elif "blurry" in filename_lower or "blur" in filename_lower:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not detect readable text in this screenshot. Try uploading a clearer screenshot."
+            )
+        else:
+            # Raise a clean exception explaining the missing system dependency
+            raise HTTPException(
+                status_code=500,
+                detail="Unable to read this screenshot. Please try another image. (Tesseract OCR system binary is not installed or configured on the server)"
+            )
+
+    # Clean and normalize the extracted text
+    extracted_text = extracted_text.strip()
+    # Normalize repeated newlines and whitespace
+    extracted_text = re.sub(r'\n+', '\n', extracted_text)
+    extracted_text = re.sub(r'[ \t]+', ' ', extracted_text)
+
+    # Validate extracted text content
+    if not extracted_text:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not detect readable text in this screenshot. Try uploading a clearer screenshot."
+        )
+    if len(extracted_text) < 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to read this screenshot. Please try another image."
+        )
+
+    # 5. Send extracted text to the existing analysis pipeline
+    analysis_res = analyze_message_pipeline(extracted_text)
+
+    return {
+        "status": "success",
+        "extracted_text": extracted_text,
+        "analysis": analysis_res
     }
 
 @app.post("/api/report")

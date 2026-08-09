@@ -74,3 +74,18 @@ export async function getHealth() {
   const response = await fetch(`${API_BASE_URL}/api/health`);
   return handleResponse(response);
 }
+
+/**
+ * Analyzes a message screenshot using OCR and runs it through the detection pipeline.
+ * @param {File} file - Selected screenshot image file
+ * @returns {Promise<Object>} Detection results
+ */
+export async function analyzeScreenshot(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${API_BASE_URL}/api/analyze-screenshot`, {
+    method: "POST",
+    body: formData,
+  });
+  return handleResponse(response);
+}

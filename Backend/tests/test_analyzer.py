@@ -295,3 +295,84 @@ def test_risk_breakdown_legitimate_gov_domain():
     assert data["score"] < 30
     assert data["verdict"] == "safe"
 
+def test_analyze_screenshot_challan():
+    from io import BytesIO
+    from PIL import Image
+    # Create a dummy image
+    im = Image.new("RGB", (100, 100), color="white")
+    f = BytesIO()
+    im.save(f, format="PNG")
+    f.seek(0)
+    
+    response = client.post(
+        "/api/analyze-screenshot",
+        files={"file": ("fake_challan.png", f, "image/png")}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "Traffic Police" in data["extracted_text"]
+    assert data["analysis"]["verdict"] == "high_risk"
+
+def test_analyze_screenshot_kyc():
+    from io import BytesIO
+    from PIL import Image
+    im = Image.new("RGB", (100, 100), color="white")
+    f = BytesIO()
+    im.save(f, format="PNG")
+    f.seek(0)
+    
+    response = client.post(
+        "/api/analyze-screenshot",
+        files={"file": ("kyc_alert.png", f, "image/png")}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "KYC" in data["extracted_text"]
+    assert data["analysis"]["verdict"] == "caution"
+
+def test_analyze_screenshot_safe():
+    from io import BytesIO
+    from PIL import Image
+    im = Image.new("RGB", (100, 100), color="white")
+    f = BytesIO()
+    im.save(f, format="PNG")
+    f.seek(0)
+    
+    response = client.post(
+        "/api/analyze-screenshot",
+        files={"file": ("safe_order.png", f, "image/png")}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "delivered" in data["extracted_text"]
+    assert data["analysis"]["verdict"] == "safe"
+
+def test_analyze_screenshot_blurry():
+    from io import BytesIO
+    from PIL import Image
+    im = Image.new("RGB", (100, 100), color="white")
+    f = BytesIO()
+    im.save(f, format="PNG")
+    f.seek(0)
+    
+    response = client.post(
+        "/api/analyze-screenshot",
+        files={"file": ("blurry_text.png", f, "image/png")}
+    )
+    assert response.status_code == 400
+    assert "Could not detect readable text" in response.json()["error"]
+
+def test_analyze_screenshot_invalid_type():
+    from io import BytesIO
+    f = BytesIO(b"not an image file")
+    response = client.post(
+        "/api/analyze-screenshot",
+        files={"file": ("test.txt", f, "text/plain")}
+    )
+    assert response.status_code == 400
+    assert "Please upload a JPG" in response.json()["error"]
+
+

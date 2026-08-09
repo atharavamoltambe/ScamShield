@@ -101,6 +101,17 @@ export default function App() {
     // Don't auto-submit so the user can review/edit
   };
 
+  const handleAnalysisResult = (resultObj, textVal) => {
+    setResult(resultObj);
+    setMessage(textVal);
+    // Smooth scroll to the result block after rendering
+    setTimeout(() => {
+      if (resultRef.current) {
+        resultRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+  };
+
   return (
     <div className="app-container">
       <Header apiOnline={apiOnline} />
@@ -115,6 +126,7 @@ export default function App() {
           loading={loading}
           onCheck={handleCheck}
           onClear={handleClear}
+          onAnalysisResult={handleAnalysisResult}
         />
         
         <ExampleMessages onSelectExample={handleExampleSelect} />
