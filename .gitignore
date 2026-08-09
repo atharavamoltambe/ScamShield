@@ -1,0 +1,23 @@
+# Test mockup screenshots
+kyc_alert.png
+safe_order.png
+tesseract-setup.exe
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Local Config
+.env
+.env.local
+
+# Builds
+dist/
+build/
