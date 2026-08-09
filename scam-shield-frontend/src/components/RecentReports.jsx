@@ -29,7 +29,7 @@ function truncateMessage(text, maxLength = 80) {
   return text.slice(0, maxLength) + "...";
 }
 
-export default function RecentReports({ reports = [], loading, onRefresh }) {
+export default function RecentReports({ reports = [], loading, onRefresh, onSelectReport }) {
   const hasReports = reports && reports.length > 0;
 
   return (
@@ -38,7 +38,7 @@ export default function RecentReports({ reports = [], loading, onRefresh }) {
         <div>
           <h2 className="section-main-title">Recently Reported Scams</h2>
           <p className="section-subtitle">
-            Examples of suspicious messages reported to Scam Shield.
+            Examples of suspicious messages reported to Scam Shield. Click on any scam to view its detailed threat analysis.
           </p>
         </div>
         
@@ -71,7 +71,20 @@ export default function RecentReports({ reports = [], loading, onRefresh }) {
       ) : (
         <div className="reports-grid">
           {reports.map((report, index) => (
-            <div key={index} className="report-card card-shadow">
+            <div 
+              key={index} 
+              className="report-card card-shadow cursor-pointer"
+              onClick={() => onSelectReport && onSelectReport(report)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === " ") && onSelectReport) {
+                  e.preventDefault();
+                  onSelectReport(report);
+                }
+              }}
+              aria-label={`View details of reported scam: ${truncateMessage(report.text, 40)}`}
+            >
               <div className="report-card-header">
                 <div className="report-badge">
                   <AlertTriangle size={14} className="badge-icon" />

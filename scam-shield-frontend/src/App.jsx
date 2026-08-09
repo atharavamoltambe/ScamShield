@@ -12,8 +12,11 @@ import ReportButton from "./components/ReportButton";
 import RecentReports from "./components/RecentReports";
 import HowItWorks from "./components/HowItWorks";
 import Footer from "./components/Footer";
+import ReportDetailModal from "./components/ReportDetailModal";
 import { checkMessage, getReports, getHealth } from "./services/api";
 import { AlertCircle, Loader } from "lucide-react";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 export default function App() {
   // Input and General State
@@ -28,6 +31,7 @@ export default function App() {
   // Reports Feed State
   const [reports, setReports] = useState([]);
   const [reportsLoading, setReportsLoading] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   const resultRef = useRef(null);
 
@@ -180,12 +184,21 @@ export default function App() {
           reports={reports}
           loading={reportsLoading}
           onRefresh={fetchReportsFeed}
+          onSelectReport={setSelectedReport}
         />
 
         <HowItWorks />
       </main>
       
       <Footer />
+
+      {selectedReport && (
+        <ReportDetailModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+          apiBaseUrl={API_BASE_URL}
+        />
+      )}
     </div>
   );
 }
